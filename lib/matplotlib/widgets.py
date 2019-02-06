@@ -993,7 +993,7 @@ class RadioButtons(AxesWidget):
         The label text of the currently selected button.
 
     """
-    def __init__(self, ax, labels, active=0, activecolor='blue'):
+    def __init__(self, ax, labels, active=0, activecolor='blue', direction='vertical'):
         """
         Add radio buttons to an `~.axes.Axes`.
 
@@ -1007,7 +1007,12 @@ class RadioButtons(AxesWidget):
             The index of the initially selected button.
         activecolor : color
             The color of the selected button.
+        direction : str
+            The direction of the buttons: 'vertical' or 'v' (default), or 'horizontal' or 'h'.
         """
+        if direction not in ['vertical', 'v', 'horizontal', 'h']:
+            raise ValueError("Invalid RadioButton direction: %s" % direction)
+
         AxesWidget.__init__(self, ax)
         self.activecolor = activecolor
         self.value_selected = None
@@ -1026,23 +1031,36 @@ class RadioButtons(AxesWidget):
         # defaul to hard-coded value if the radius becomes too large
         if(circle_radius > 0.05):
             circle_radius = 0.05
-
+            
+        # in case of horizontal buttons, write them left-to-right
+        if direction == 'horizontal' or direction == 'h':
+            labels.reverse()
+            
         self.labels = []
         self.circles = []
         for y, label in zip(ys, labels):
-            t = ax.text(0.25, y, label, transform=ax.transAxes,
-                        horizontalalignment='left',
-                        verticalalignment='center')
-
+            if direction == 'vertical' or direction == 'v':
+                t = ax.text(0.25, y, label, transform=ax.transAxes,
+                            horizontalalignment='left',
+                            verticalalignment='center')
+            elif direction == 'horizontal' or direction == 'h':
+                t = ax.text(y, 0.25, label, transform=ax.transAxes,
+                            horizontalalignment='center',
+                            verticalalignment='bottom')
+                
             if cnt == active:
                 self.value_selected = label
                 facecolor = activecolor
             else:
                 facecolor = axcolor
 
-            p = Circle(xy=(0.15, y), radius=circle_radius, edgecolor='black',
-                       facecolor=facecolor, transform=ax.transAxes)
-
+            if direction == 'vertical' or direction == 'v':  
+                p = Circle(xy=(0.15, y), radius=circle_radius, edgecolor='black',
+                           facecolor=facecolor, transform=ax.transAxes)
+            elif direction == 'horizontal' or direction == 'h':
+                p = Circle(xy=(y, 0.15), radius=circle_radius, edgecolor='black',
+                           facecolor=facecolor, transform=ax.transAxes)
+                
             self.labels.append(t)
             self.circles.append(p)
             ax.add_patch(p)
