@@ -1035,6 +1035,7 @@ class RadioButtons(AxesWidget):
         # in case of horizontal buttons, write them left-to-right
         if orientation == 'horizontal':
             labels.reverse()
+            active = (len(labels) - 1) - active
             
         self.labels = []
         self.circles = []
